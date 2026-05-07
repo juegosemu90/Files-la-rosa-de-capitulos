@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARCHIVE // FILES</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    body { background: #111118; }
+
+    .dir-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--nav-height);
+    }
+
+    /* ─── ENCABEZADO ─── */
+    .dir-title-block {
+      text-align: center;
+      padding: 2.2rem 1rem 1.4rem;
+      border-bottom: 1px solid rgba(140, 80, 255, 0.15);
+    }
+
+    .dir-title-block h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 9vw, 3.8rem);
+      color: #a259ff;
+      letter-spacing: 3px;
+      margin-bottom: 0.2rem;
+      text-shadow: 0 0 28px rgba(162, 89, 255, 0.4);
+    }
+
+    .dir-root-label {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #888;
+      letter-spacing: 1px;
+      margin-bottom: 1.4rem;
+    }
+
+    /* ─── BUSCADOR ─── */
+    .dir-search-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      width: 100%;
+    }
+
+    .dir-search-input {
+      width: 100%;
+      background: #1a1a26;
+      border: none;
+      border-left: 3px solid #7c3aed;
+      border-radius: 0 4px 4px 0;
+      padding: 0.85rem 1.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: #ccc;
+      outline: none;
+      letter-spacing: 0.5px;
+      transition: border-color 0.2s, background 0.2s;
+      display: block;
+    }
+
+    .dir-search-input::placeholder { color: #555; }
+    .dir-search-input:focus {
+      border-left-color: #a259ff;
+      background: #1f1f30;
+    }
+
+    /* ─── LISTA ─── */
+    .dir-list-wrap {
+      max-width: 680px;
+      margin: 1.8rem auto 3rem;
+      padding: 0 1rem;
+      width: 100%;
+    }
+
+    /* Item base */
+    .dir-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a1a26;
+      border-left: 3px solid #2a1a4a;
+      border-radius: 0 6px 6px 0;
+      padding: 0.88rem 1.2rem;
+      margin-bottom: 0.55rem;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: #777;
+      text-decoration: none;
+      transition: background 0.18s, border-left-color 0.18s, color 0.18s;
+      cursor: default;
+    }
+
+    /* Item clickeable */
+    a.dir-item {
+      color: #a259ff;
+      border-left-color: #7c3aed;
+      cursor: pointer;
+    }
+
+    a.dir-item:hover {
+      background: #201830;
+      border-left-color: #c084ff;
+      color: #c084ff;
+    }
+
+    .dir-item-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.3px;
+    }
+
+    .dir-item-size {
+      font-size: 0.78rem;
+      color: #555;
+      flex-shrink: 0;
+      margin-left: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    a.dir-item .dir-item-size       { color: #7a6090; }
+    a.dir-item:hover .dir-item-size { color: #a080cc; }
+
+    /* Sin resultados */
+    .dir-no-results {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: #555;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    /* Footer */
+    .dir-footer {
+      margin-top: auto;
+      border-top: 1px solid rgba(140, 80, 255, 0.1);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: #444;
+      letter-spacing: 1px;
+    }
+
+    .dir-footer a { color: #7c3aed; }
+    .dir-footer a:hover { color: #a259ff; }
+
+    @media (max-width: 480px) {
+      .dir-item { padding: 0.75rem 0.9rem; font-size: 0.82rem; }
+      .dir-item-size { margin-left: 0.75rem; font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-text">ARCH<span class="logo-accent">IV</span>E</span>
+        <span class="logo-bracket">]</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">~/inicio</a></li>
+        <li><a href="files.html" class="nav-link active">~/files</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html" class="mobile-link">~/inicio</a>
+      <a href="files.html" class="mobile-link active">~/files</a>
+    </div>
+  </nav>
+
+  <!-- DIRECTORIO -->
+  <div class="dir-page">
+
+    <div class="dir-title-block">
+      <h1>Directory</h1>
+      <p class="dir-root-label">Root / .</p>
+      <div class="dir-search-wrap">
+        <input
+          type="text"
+          id="dirSearch"
+          class="dir-search-input"
+          placeholder="Search this directory..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+    </div>
+
+    <div class="dir-list-wrap">
+
+      <!-- Carpeta padre -->
+      <div class="dir-item">
+        <span class="dir-item-name">../</span>
+      </div>
+
+      <!-- Temporada 5 -->
+      <a class="dir-item"
+         href="https://archive.org/details/LRDG_T5_TB"
+         target="_blank" rel="noopener"
+         data-name="Temporada 5">
+        <span class="dir-item-name">Temporada 5/</span>
+        <span class="dir-item-size">archive.org</span>
+      </a>
+
+      <!-- Temporada 4 -->
+      <a class="dir-item"
+         href="https://archive.org/details/LRDG_T4_TB"
+         target="_blank" rel="noopener"
+         data-name="Temporada 4">
+        <span class="dir-item-name">Temporada 4/</span>
+        <span class="dir-item-size">archive.org</span>
+      </a>
+
+      <!-- Temporada 3 -->
+      <a class="dir-item"
+         href="https://archive.org/details/LRDG_T3_TB"
+         target="_blank" rel="noopener"
+         data-name="Temporada 3">
+        <span class="dir-item-name">Temporada 3/</span>
+        <span class="dir-item-size">archive.org</span>
+      </a>
+
+      <!-- Temporada 2 -->
+      <a class="dir-item"
+         href="https://archive.org/details/LRDG_T2_TB"
+         target="_blank" rel="noopener"
+         data-name="Temporada 2">
+        <span class="dir-item-name">Temporada 2/</span>
+        <span class="dir-item-size">archive.org</span>
+      </a>
+
+      <!-- Temporada 1 -->
+      <a class="dir-item"
+         href="https://archive.org/details/LRDG_T1_TB"
+         target="_blank" rel="noopener"
+         data-name="Temporada 1">
+        <span class="dir-item-name">Temporada 1/</span>
+        <span class="dir-item-size">archive.org</span>
+      </a>
+
+      <!-- Sin resultados -->
+      <div class="dir-no-results" id="dirNoResults">
+        No se encontraron resultados para "<span id="dirQueryLabel"></span>"
+      </div>
+
+    </div>
+
+    <footer class="dir-footer">
+      [ARCHIVE] &nbsp;·&nbsp;
+      Alojado en <a href="https://archive.org" target="_blank" rel="noopener">Internet Archive</a>
+      &nbsp;·&nbsp; Acceso libre
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    /* ─── BUSCADOR ─── */
+    (function () {
+      const input     = document.getElementById('dirSearch');
+      const items     = document.querySelectorAll('a.dir-item');
+      const noResults = document.getElementById('dirNoResults');
+      const queryLbl  = document.getElementById('dirQueryLabel');
+
+      if (!input) return;
+
+      input.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        let visible = 0;
+
+        items.forEach(item => {
+          const name = (item.dataset.name || '').toLowerCase();
+          const show = !q || name.includes(q);
+          item.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+
+        if (noResults) {
+          noResults.style.display = (!q || visible > 0) ? 'none' : 'block';
+          if (queryLbl) queryLbl.textContent = this.value;
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault(); input.focus();
+        }
+        if (e.key === 'Escape') {
+          input.value = '';
+          input.dispatchEvent(new Event('input'));
+          input.blur();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
