@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARCHIVE // FILES</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    body { background: #111118; }
+
+    .dir-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--nav-height);
+    }
+
+    /* ══ ENCABEZADO ══ */
+    .dir-title-block {
+      text-align: center;
+      padding: 2.2rem 1rem 1.4rem;
+      border-bottom: 1px solid rgba(140, 80, 255, 0.15);
+    }
+
+    .dir-title-block h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 9vw, 3.8rem);
+      color: #a259ff;
+      letter-spacing: 3px;
+      margin-bottom: 0.2rem;
+      text-shadow: 0 0 28px rgba(162, 89, 255, 0.4);
+    }
+
+    .dir-root-label {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #888;
+      letter-spacing: 1px;
+      margin-bottom: 1.4rem;
+    }
+
+    /* ══ BUSCADOR ══ */
+    .dir-search-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      width: 100%;
+    }
+
+    .dir-search-input {
+      width: 100%;
+      background: #1a1a26;
+      border: none;
+      border-left: 3px solid #7c3aed;
+      border-radius: 0 4px 4px 0;
+      padding: 0.85rem 1.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: #ccc;
+      outline: none;
+      letter-spacing: 0.5px;
+      transition: border-color 0.2s, background 0.2s;
+      display: block;
+    }
+
+    .dir-search-input::placeholder { color: #555; }
+    .dir-search-input:focus {
+      border-left-color: #a259ff;
+      background: #1f1f30;
+    }
+
+    /* ══ LISTA DE DIRECTORIOS (vista raíz) ══ */
+    .dir-list-wrap {
+      max-width: 680px;
+      margin: 1.8rem auto 3rem;
+      padding: 0 1rem;
+      width: 100%;
+    }
+
+    .dir-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a1a26;
+      border-left: 3px solid #2a1a4a;
+      border-radius: 0 6px 6px 0;
+      padding: 0.88rem 1.2rem;
+      margin-bottom: 0.55rem;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: #777;
+      text-decoration: none;
+      transition: background 0.18s, border-left-color 0.18s, color 0.18s;
+      cursor: default;
+    }
+
+    /* item clickeable (temporada) */
+    button.dir-item {
+      width: 100%;
+      background: #1a1a26;
+      border: none;
+      border-left: 3px solid #7c3aed;
+      color: #a259ff;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    button.dir-item:hover {
+      background: #201830;
+      border-left-color: #c084ff;
+      color: #c084ff;
+    }
+
+    .dir-item-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.3px;
+    }
+
+    .dir-item-meta {
+      font-size: 0.75rem;
+      color: #7a6090;
+      flex-shrink: 0;
+      margin-left: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    button.dir-item:hover .dir-item-meta { color: #a080cc; }
+
+    /* ══ VISTA DE CAPÍTULOS ══ */
+    .chapter-view {
+      display: none;
+      max-width: 680px;
+      margin: 0 auto 3rem;
+      padding: 0 1rem;
+      width: 100%;
+    }
+
+    .chapter-view.active { display: block; }
+
+    /* Breadcrumb dentro de la vista */
+    .chapter-breadcrumb {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: #666;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .chapter-breadcrumb .bc-back {
+      color: #a259ff;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 0;
+      transition: color 0.15s;
+    }
+
+    .chapter-breadcrumb .bc-back:hover { color: #c084ff; text-decoration: underline; }
+    .chapter-breadcrumb .bc-sep        { color: #444; }
+    .chapter-breadcrumb .bc-current    { color: #aaa; }
+
+    /* Encabezado de la temporada abierta */
+    .chapter-header {
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(140, 80, 255, 0.15);
+    }
+
+    .chapter-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: #a259ff;
+      letter-spacing: 2px;
+    }
+
+    .chapter-subtitle {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: #666;
+      margin-top: 0.2rem;
+    }
+
+    /* Estado de carga */
+    .loading-state {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #7c3aed;
+      padding: 2rem 0;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .loading-state::after {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      animation: dots 1.2s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%   { content: ''; }
+      25%  { content: '.'; }
+      50%  { content: '..'; }
+      75%  { content: '...'; }
+      100% { content: ''; }
+    }
+
+    /* Estado de error */
+    .error-state {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #ff4466;
+      padding: 2rem 0;
+      text-align: center;
+    }
+
+    .error-state a {
+      color: #a259ff;
+      text-decoration: underline;
+    }
+
+    /* Lista de capítulos */
+    .chapter-list { list-style: none; }
+
+    /* Item de capítulo */
+    .chapter-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a1a26;
+      border-left: 3px solid #7c3aed;
+      border-radius: 0 6px 6px 0;
+      padding: 0.78rem 1.1rem;
+      margin-bottom: 0.45rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #a259ff;
+      text-decoration: none;
+      transition: background 0.18s, border-left-color 0.18s, color 0.18s;
+      gap: 0.75rem;
+    }
+
+    .chapter-item:hover {
+      background: #201830;
+      border-left-color: #c084ff;
+      color: #c084ff;
+    }
+
+    .chapter-item-icon {
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .chapter-item-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: inherit;
+    }
+
+    .chapter-item-size {
+      font-size: 0.7rem;
+      color: #7a6090;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .chapter-item:hover .chapter-item-size { color: #a080cc; }
+
+    /* Contador de archivos */
+    .file-count {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: #555;
+      text-align: right;
+      margin-bottom: 0.75rem;
+      letter-spacing: 1px;
+    }
+
+    /* Sin resultados de búsqueda */
+    .dir-no-results {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: #555;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    /* ══ FOOTER ══ */
+    .dir-footer {
+      margin-top: auto;
+      border-top: 1px solid rgba(140, 80, 255, 0.1);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: #444;
+      letter-spacing: 1px;
+    }
+
+    .dir-footer a { color: #7c3aed; }
+    .dir-footer a:hover { color: #a259ff; }
+
+    @media (max-width: 480px) {
+      .dir-item, .chapter-item { padding: 0.72rem 0.85rem; font-size: 0.8rem; }
+      .dir-item-meta, .chapter-item-size { margin-left: 0.5rem; font-size: 0.68rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-text">ARCH<span class="logo-accent">IV</span>E</span>
+        <span class="logo-bracket">]</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">~/inicio</a></li>
+        <li><a href="files.html" class="nav-link active">~/files</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html" class="mobile-link">~/inicio</a>
+      <a href="files.html" class="mobile-link active">~/files</a>
+    </div>
+  </nav>
+
+  <!-- ══ DIRECTORIO ══ -->
+  <div class="dir-page">
+
+    <!-- Encabezado -->
+    <div class="dir-title-block">
+      <h1>Directory</h1>
+      <p class="dir-root-label" id="rootLabel">Root / .</p>
+      <div class="dir-search-wrap">
+        <input
+          type="text"
+          id="dirSearch"
+          class="dir-search-input"
+          placeholder="Search this directory..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+    </div>
+
+    <!-- ══ VISTA RAÍZ: lista de temporadas ══ -->
+    <div class="dir-list-wrap" id="rootView">
+
+      <div class="dir-item">
+        <span class="dir-item-name">../</span>
+      </div>
+
+      <!-- Las temporadas se generan desde JS -->
+      <div id="seasonList"></div>
+
+      <div class="dir-no-results" id="dirNoResults">
+        No se encontraron resultados para "<span id="dirQueryLabel"></span>"
+      </div>
+    </div>
+
+    <!-- ══ VISTA DE CAPÍTULOS: se muestra al abrir una temporada ══ -->
+    <div class="chapter-view" id="chapterView">
+
+      <!-- Breadcrumb de navegación -->
+      <div class="chapter-breadcrumb">
+        <button class="bc-back" id="bcBack">Root / .</button>
+        <span class="bc-sep">/</span>
+        <span class="bc-current" id="bcCurrent">—</span>
+      </div>
+
+      <!-- Encabezado de la temporada -->
+      <div class="chapter-header">
+        <div class="chapter-title" id="chapterTitle">—</div>
+        <div class="chapter-subtitle" id="chapterSubtitle">Cargando archivos desde Internet Archive…</div>
+      </div>
+
+      <!-- Contenido dinámico -->
+      <div id="chapterContent">
+        <div class="loading-state">Conectando con archive.org</div>
+      </div>
+
+    </div>
+
+    <footer class="dir-footer">
+      [ARCHIVE] &nbsp;·&nbsp;
+      Alojado en <a href="https://archive.org" target="_blank" rel="noopener">Internet Archive</a>
+      &nbsp;·&nbsp; Acceso libre
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+  /* ══════════════════════════════════════════════════════
+     LÓGICA PRINCIPAL — Directory viewer con Internet Archive API
+  ══════════════════════════════════════════════════════ */
+
+  /* ── Datos de las 5 temporadas ── */
+  const SEASONS = [
+    { name: 'Temporada 5', id: 'LRDG_T5_TB' },
+    { name: 'Temporada 4', id: 'LRDG_T4_TB' },
+    { name: 'Temporada 3', id: 'LRDG_T3_TB' },
+    { name: 'Temporada 2', id: 'LRDG_T2_TB' },
+    { name: 'Temporada 1', id: 'LRDG_T1_TB' },
+  ];
+
+  /* ── Referencias al DOM ── */
+  const rootView      = document.getElementById('rootView');
+  const chapterView   = document.getElementById('chapterView');
+  const seasonList    = document.getElementById('seasonList');
+  const bcBack        = document.getElementById('bcBack');
+  const bcCurrent     = document.getElementById('bcCurrent');
+  const chapterTitle  = document.getElementById('chapterTitle');
+  const chapterSub    = document.getElementById('chapterSubtitle');
+  const chapterContent= document.getElementById('chapterContent');
+  const rootLabel     = document.getElementById('rootLabel');
+  const searchInput   = document.getElementById('dirSearch');
+  const noResults     = document.getElementById('dirNoResults');
+  const queryLabel    = document.getElementById('dirQueryLabel');
+
+  /* ── Icono según extensión ── */
+  function getIcon(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    const map = {
+      mp4: '🎞', mkv: '🎞', avi: '🎞', mov: '🎞', webm: '🎞',
+      mp3: '🔊', flac: '🔊', ogg: '🔊', wav: '🔊', aac: '🔊',
+      pdf: '📄', epub: '📚', txt: '📝', doc: '📄', docx: '📄',
+      zip: '🗜', rar: '🗜', '7z': '🗜', tar: '🗜', gz: '🗜',
+      jpg: '🖼', jpeg: '🖼', png: '🖼', gif: '🖼', webp: '🖼',
+      srt: '💬', sub: '💬', ass: '💬', vtt: '💬',
+    };
+    return map[ext] || '📁';
+  }
+
+  /* ── Formatear tamaño en bytes ── */
+  function formatSize(bytes) {
+    if (!bytes || bytes === 0) return '—';
+    const b = parseInt(bytes, 10);
+    if (b >= 1073741824) return (b / 1073741824).toFixed(2) + ' GB';
+    if (b >= 1048576)    return (b / 1048576).toFixed(1)    + ' MB';
+    if (b >= 1024)       return (b / 1024).toFixed(0)       + ' KB';
+    return b + ' B';
+  }
+
+  /* ── Generar lista de temporadas en la vista raíz ── */
+  function renderSeasons() {
+    seasonList.innerHTML = '';
+    SEASONS.forEach(season => {
+      const btn = document.createElement('button');
+      btn.className   = 'dir-item';
+      btn.dataset.name = season.name.toLowerCase();
+      btn.innerHTML = `
+        <span class="dir-item-name">📁 ${season.name}/</span>
+        <span class="dir-item-meta">archive.org</span>
+      `;
+      btn.addEventListener('click', () => openSeason(season));
+      seasonList.appendChild(btn);
+    });
+  }
+
+  /* ── Abrir una temporada: fetch a la API de Internet Archive ── */
+  async function openSeason(season) {
+    /* Cambiar a vista de capítulos */
+    rootView.style.display    = 'none';
+    chapterView.classList.add('active');
+    rootLabel.textContent     = `Root / ${season.name}`;
+    bcCurrent.textContent     = season.name;
+    chapterTitle.textContent  = season.name;
+    chapterSub.textContent    = `archive.org/details/${season.id}`;
+    searchInput.value         = '';
+
+    /* Spinner de carga */
+    chapterContent.innerHTML  = '<div class="loading-state">Conectando con archive.org</div>';
+
+    try {
+      /*
+        Internet Archive Metadata API:
+        https://archive.org/metadata/{identifier}
+        Devuelve JSON con todos los archivos del ítem.
+        Usamos un proxy CORS gratuito para evitar bloqueos desde GitHub Pages.
+      */
+      const apiUrl  = `https://archive.org/metadata/${season.id}`;
+      const proxy   = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+
+      const res     = await fetch(proxy);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const wrapper = await res.json();
+      const data    = JSON.parse(wrapper.contents);
+
+      /*
+        Filtrar solo los archivos dentro de la carpeta "Capitulos/"
+        que no sean archivos derivados de Internet Archive (_thumb, etc.)
+      */
+      const files = (data.files || []).filter(f => {
+        const name = f.name || '';
+        return (
+          name.startsWith('Capitulos/') &&
+          !name.endsWith('/') &&           /* excluir carpetas */
+          !name.includes('_thumb')         /* excluir miniaturas */
+        );
+      });
+
+      if (files.length === 0) {
+        chapterContent.innerHTML = `
+          <div class="error-state">
+            No se encontraron archivos en /Capitulos/<br><br>
+            <a href="https://archive.org/details/${season.id}" target="_blank" rel="noopener">
+              Ver ítem completo en archive.org ↗
+            </a>
+          </div>`;
+        return;
+      }
+
+      /* Calcular tamaño total */
+      const totalBytes = files.reduce((acc, f) => acc + (parseInt(f.size, 10) || 0), 0);
+
+      chapterSub.textContent = `${files.length} archivos · ${formatSize(totalBytes)} total · archive.org/details/${season.id}`;
+
+      /* Renderizar lista de archivos */
+      const ul = document.createElement('ul');
+      ul.className = 'chapter-list';
+
+      /* Contador */
+      const counter = document.createElement('div');
+      counter.className = 'file-count';
+      counter.textContent = `${files.length} archivo${files.length !== 1 ? 's' : ''}`;
+
+      files.forEach(file => {
+        const shortName = file.name.replace('Capitulos/', '');
+        const downloadUrl = `https://archive.org/download/${season.id}/${encodeURIComponent(file.name)}`;
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <a class="chapter-item" href="${downloadUrl}" target="_blank" rel="noopener">
+            <span class="chapter-item-icon">${getIcon(shortName)}</span>
+            <span class="chapter-item-name">${shortName}</span>
+            <span class="chapter-item-size">${formatSize(file.size)}</span>
+          </a>`;
+        ul.appendChild(li);
+      });
+
+      chapterContent.innerHTML = '';
+      chapterContent.appendChild(counter);
+      chapterContent.appendChild(ul);
+
+    } catch (err) {
+      /* Si falla la API, mostrar error con link directo */
+      chapterContent.innerHTML = `
+        <div class="error-state">
+          ⚠ No se pudo cargar la lista de archivos.<br>
+          <small style="color:#666; display:block; margin:0.5rem 0;">${err.message}</small>
+          <a href="https://archive.org/download/${season.id}/Capitulos/" target="_blank" rel="noopener">
+            Ver archivos directamente en archive.org ↗
+          </a>
+        </div>`;
+    }
+  }
+
+  /* ── Volver a la vista raíz ── */
+  function goBack() {
+    chapterView.classList.remove('active');
+    rootView.style.display = '';
+    rootLabel.textContent  = 'Root / .';
+    searchInput.value      = '';
+  }
+
+  bcBack.addEventListener('click', goBack);
+
+  /* ── Buscador (vista raíz: filtra temporadas) ── */
+  searchInput.addEventListener('input', function () {
+    const q = this.value.trim().toLowerCase();
+
+    /* Si estamos en vista de capítulos, buscar ahí */
+    if (chapterView.classList.contains('active')) {
+      const items = chapterContent.querySelectorAll('.chapter-item');
+      let visible = 0;
+      items.forEach(item => {
+        const name = item.querySelector('.chapter-item-name')?.textContent.toLowerCase() || '';
+        const show = !q || name.includes(q);
+        item.parentElement.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      return;
+    }
+
+    /* Vista raíz: filtrar temporadas */
+    const btns = seasonList.querySelectorAll('button.dir-item');
+    let visible = 0;
+    btns.forEach(btn => {
+      const name = btn.dataset.name || '';
+      const show = !q || name.includes(q);
+      btn.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    if (noResults) {
+      noResults.style.display = (!q || visible > 0) ? 'none' : 'block';
+      if (queryLabel) queryLabel.textContent = this.value;
+    }
+  });
+
+  /* CTRL+K → foco en buscador */
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault(); searchInput.focus();
+    }
+    if (e.key === 'Escape' && !chapterView.classList.contains('active')) {
+      searchInput.value = '';
+      searchInput.dispatchEvent(new Event('input'));
+    }
+    /* Escape en vista de capítulos → volver */
+    if (e.key === 'Escape' && chapterView.classList.contains('active')) {
+      goBack();
+    }
+  });
+
+  /* ── Inicializar ── */
+  renderSeasons();
+  </script>
+</body>
+</html>

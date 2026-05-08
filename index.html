@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARCHIVE // ROOT</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Fuente monospace desde Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       NAVBAR SUPERIOR
+  ═══════════════════════════════════════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <!-- Logo / nombre del archivo -->
+      <a href="index.html" class="nav-logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-text">ARCH<span class="logo-accent">IV</span>E</span>
+        <span class="logo-bracket">]</span>
+      </a>
+
+      <!-- Menú de navegación -->
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link active">~/inicio</a></li>
+        <li><a href="files.html" class="nav-link">~/files</a></li>
+      </ul>
+
+      <!-- Botón hamburguesa para móvil -->
+      <button class="hamburger" id="hamburger" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Menú móvil desplegable -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html" class="mobile-link active">~/inicio</a>
+      <a href="files.html" class="mobile-link">~/files</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════
+       HERO / PANTALLA PRINCIPAL
+  ═══════════════════════════════════════════ -->
+  <main class="hero">
+
+    <!-- Rejilla de fondo decorativa -->
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <!-- Partículas de fondo -->
+    <div class="particles" id="particles" aria-hidden="true"></div>
+
+    <!-- Contenedor central del hero -->
+    <div class="hero-content">
+
+      <!-- Línea de "ruta" al estilo terminal -->
+      <p class="terminal-path" id="terminalPath">
+        <span class="path-user">visitor</span><span class="path-at">@</span><span class="path-host">archive</span><span class="path-colon">:</span><span class="path-dir">~/</span><span class="cursor-blink">_</span>
+      </p>
+
+      <!-- Título principal con animación de glitch -->
+      <h1 class="hero-title glitch" data-text="PERSONAL ARCHIVE">
+        PERSONAL ARCHIVE
+      </h1>
+
+      <!-- Subtítulo descriptivo -->
+      <p class="hero-subtitle">
+        // Colección digitalizada de archivos, medios y registros históricos<br />
+        // Alojado en Internet Archive · Acceso público · Sin DRM
+      </p>
+
+      <!-- Estadísticas rápidas tipo dashboard -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <span class="stat-number" data-target="48">00</span>
+          <span class="stat-label">ARCHIVOS</span>
+        </div>
+        <div class="stat-divider">|</div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="6">0</span>
+          <span class="stat-label">CARPETAS</span>
+        </div>
+        <div class="stat-divider">|</div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="100">00</span>
+          <span class="stat-label">% LIBRE</span>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="hero-actions">
+        <a href="files.html" class="btn btn-primary">
+          <span class="btn-icon">▶</span> EXPLORAR FILES
+        </a>
+        <a href="https://archive.org" target="_blank" rel="noopener" class="btn btn-ghost">
+          <span class="btn-icon">⎋</span> INTERNET ARCHIVE
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Bloque tipo terminal en la parte inferior del hero -->
+    <div class="terminal-widget">
+      <div class="terminal-header">
+        <span class="t-dot t-red"></span>
+        <span class="t-dot t-yellow"></span>
+        <span class="t-dot t-green"></span>
+        <span class="t-title">bash — archive@root:~</span>
+      </div>
+      <div class="terminal-body" id="terminalBody">
+        <!-- Las líneas se inyectan con JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════
+       SECCIÓN: ÚLTIMAS ENTRADAS
+  ═══════════════════════════════════════════ -->
+  <section class="recent-section">
+    <div class="section-header">
+      <h2 class="section-title"><span class="accent">//</span> ENTRADAS RECIENTES</h2>
+      <a href="files.html" class="see-all">ver todo →</a>
+    </div>
+
+    <div class="recent-grid">
+      <!-- Tarjeta reciente 1 -->
+      <a href="https://archive.org/details/example-item-1" target="_blank" rel="noopener" class="recent-card">
+        <div class="card-type">📁 AUDIO</div>
+        <div class="card-name">radio_broadcast_1984.mp3</div>
+        <div class="card-meta">
+          <span>44.1 kHz · 320 kbps</span>
+          <span class="card-date">2024-01-15</span>
+        </div>
+      </a>
+
+      <!-- Tarjeta reciente 2 -->
+      <a href="https://archive.org/details/example-item-2" target="_blank" rel="noopener" class="recent-card">
+        <div class="card-type">📄 PDF</div>
+        <div class="card-name">manual_tecnico_v2.pdf</div>
+        <div class="card-meta">
+          <span>128 pp · 12.4 MB</span>
+          <span class="card-date">2024-02-03</span>
+        </div>
+      </a>
+
+      <!-- Tarjeta reciente 3 -->
+      <a href="https://archive.org/details/example-item-3" target="_blank" rel="noopener" class="recent-card">
+        <div class="card-type">🎞 VIDEO</div>
+        <div class="card-name">documental_urbano_1992.avi</div>
+        <div class="card-meta">
+          <span>720p · 1.2 GB</span>
+          <span class="card-date">2024-02-20</span>
+        </div>
+      </a>
+
+      <!-- Tarjeta reciente 4 -->
+      <a href="https://archive.org/details/example-item-4" target="_blank" rel="noopener" class="recent-card">
+        <div class="card-type">🖼 IMG</div>
+        <div class="card-name">fotografias_ciudad_1970s.zip</div>
+        <div class="card-meta">
+          <span>240 fotos · 890 MB</span>
+          <span class="card-date">2024-03-01</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-logo">[ARCHIVE]</span>
+      <span class="footer-sep">·</span>
+      <span class="footer-text">Alojado en <a href="https://archive.org" target="_blank" rel="noopener">Internet Archive</a></span>
+      <span class="footer-sep">·</span>
+      <span class="footer-text">Acceso libre · Sin cookies · Sin rastreo</span>
+    </div>
+    <div class="footer-line">
+      <!-- Línea decorativa animada -->
+      <div class="scan-line"></div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

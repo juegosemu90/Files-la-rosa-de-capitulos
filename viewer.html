@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARCHIVE // VIEWER</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body { background: #111118; }
+
+    /* ── PÁGINA ── */
+    .viewer-page { min-height: 100vh; display: flex; flex-direction: column; padding-top: var(--nav-height); }
+
+    /* ── ENCABEZADO ── */
+    .viewer-header {
+      text-align: center;
+      padding: 2rem 1rem 1.4rem;
+      border-bottom: 1px solid rgba(140, 80, 255, 0.15);
+    }
+
+    /* Breadcrumb */
+    .viewer-breadcrumb {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: #666;
+      margin-bottom: 0.8rem;
+      letter-spacing: 1px;
+    }
+    .viewer-breadcrumb a { color: #a259ff; text-decoration: none; }
+    .viewer-breadcrumb a:hover { text-shadow: 0 0 8px #a259ff; }
+    .viewer-breadcrumb span { color: #555; margin: 0 6px; }
+
+    .viewer-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 8vw, 3.2rem);
+      color: #a259ff;
+      letter-spacing: 3px;
+      margin-bottom: 0.3rem;
+      text-shadow: 0 0 24px rgba(162, 89, 255, 0.4);
+    }
+
+    .viewer-meta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #666;
+      letter-spacing: 1px;
+      margin-bottom: 1.2rem;
+    }
+    .viewer-meta .accent { color: #a259ff; }
+
+    /* Buscador de capítulos */
+    .viewer-search-wrap { max-width: 680px; margin: 0 auto; padding: 0 1rem; width: 100%; }
+    .viewer-search-input {
+      width: 100%; background: #1a1a26; border: none;
+      border-left: 3px solid #7c3aed; border-radius: 0 4px 4px 0;
+      padding: 0.82rem 1.2rem; font-family: var(--font-mono);
+      font-size: 0.85rem; color: #ccc; outline: none;
+      transition: border-color 0.2s, background 0.2s; display: block;
+    }
+    .viewer-search-input::placeholder { color: #555; }
+    .viewer-search-input:focus { border-left-color: #a259ff; background: #1f1f30; }
+
+    /* ── LISTA DE CAPÍTULOS ── */
+    .viewer-list-wrap { max-width: 680px; margin: 1.6rem auto 3rem; padding: 0 1rem; width: 100%; }
+
+    /* Item padre ../ */
+    .ch-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1a1a26; border-left: 3px solid #2a1a4a;
+      border-radius: 0 6px 6px 0; padding: 0.82rem 1.2rem;
+      margin-bottom: 0.45rem; font-family: var(--font-mono);
+      font-size: 0.85rem; color: #777; text-decoration: none;
+      transition: background 0.18s, border-left-color 0.18s, color 0.18s;
+      cursor: default;
+    }
+    a.ch-item { color: #ccc; border-left-color: #5a3a8a; cursor: pointer; }
+    a.ch-item:hover { background: #1e1830; border-left-color: #a259ff; color: #e0c8ff; }
+
+    .ch-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ch-ext  { font-size: 0.7rem; color: #7a6090; flex-shrink: 0; margin-left: 1rem; letter-spacing: 1px; }
+    .ch-size { font-size: 0.7rem; color: #555; flex-shrink: 0; margin-left: 0.75rem; white-space: nowrap; }
+
+    a.ch-item:hover .ch-ext  { color: #c084ff; }
+    a.ch-item:hover .ch-size { color: #9080aa; }
+
+    /* Badge de tipo */
+    .ch-badge {
+      font-size: 0.6rem; letter-spacing: 1.5px; padding: 2px 6px;
+      border-radius: 2px; border: 1px solid #3a2060;
+      color: #8060aa; background: #150e25; flex-shrink: 0; margin-left: 0.75rem;
+    }
+
+    /* ── ESTADOS ── */
+    .viewer-loading, .viewer-error, .viewer-empty {
+      text-align: center; padding: 3rem 1rem;
+      font-family: var(--font-mono); font-size: 0.82rem; color: #666;
+    }
+    .viewer-loading .spin {
+      display: inline-block; font-size: 1.4rem; color: #a259ff;
+      animation: spinAnim 1s linear infinite; margin-bottom: 0.8rem;
+    }
+    @keyframes spinAnim { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .viewer-error { color: #ff4466; }
+    .viewer-error .err-icon { font-size: 1.6rem; display: block; margin-bottom: 0.6rem; }
+    .viewer-error small { display: block; margin-top: 0.4rem; color: #884455; font-size: 0.72rem; }
+
+    /* Contador */
+    .ch-count { font-family: var(--font-mono); font-size: 0.7rem; color: #555; margin-bottom: 0.8rem; letter-spacing: 1px; }
+    .ch-count .accent { color: #a259ff; }
+
+    /* Sin resultados de búsqueda */
+    .ch-no-results { text-align: center; padding: 2rem; font-family: var(--font-mono); font-size: 0.78rem; color: #555; display: none; }
+
+    /* ── FOOTER ── */
+    .viewer-footer {
+      margin-top: auto; border-top: 1px solid rgba(140, 80, 255, 0.1);
+      padding: 1rem 1.5rem; text-align: center;
+      font-family: var(--font-mono); font-size: 0.68rem; color: #444; letter-spacing: 1px;
+    }
+    .viewer-footer a { color: #7c3aed; }
+    .viewer-footer a:hover { color: #a259ff; }
+
+    /* Botón ver en IA */
+    .btn-ia {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 1rem; font-family: var(--font-mono); font-size: 0.72rem;
+      letter-spacing: 1px; border: 1px solid #5a3a8a; border-radius: 3px;
+      color: #a259ff; background: transparent; cursor: pointer;
+      text-decoration: none; transition: all 0.18s; margin-top: 0.8rem;
+    }
+    .btn-ia:hover { border-color: #a259ff; background: rgba(162,89,255,0.08); }
+
+    @media (max-width: 480px) {
+      .ch-item { padding: 0.7rem 0.85rem; font-size: 0.8rem; }
+      .ch-size { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════ NAVBAR ══════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-text">ARCH<span class="logo-accent">IV</span>E</span>
+        <span class="logo-bracket">]</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">~/inicio</a></li>
+        <li><a href="files.html" class="nav-link">~/files</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html" class="mobile-link">~/inicio</a>
+      <a href="files.html" class="mobile-link">~/files</a>
+    </div>
+  </nav>
+
+  <!-- ══════════ VIEWER ══════════ -->
+  <div class="viewer-page">
+
+    <!-- Encabezado dinámico -->
+    <div class="viewer-header">
+      <div class="viewer-breadcrumb">
+        <a href="files.html">files</a>
+        <span>/</span>
+        <span id="bcSeason">Temporada ?</span>
+        <span>/</span>
+        <span style="color:#888">Capítulos</span>
+      </div>
+      <h1 id="pageTitle">Temporada ?</h1>
+      <p class="viewer-meta">
+        Item: <span class="accent" id="itemId">—</span> &nbsp;·&nbsp;
+        <span id="fileCount">—</span> archivos
+      </p>
+      <div class="viewer-search-wrap">
+        <input type="text" id="chSearch" class="viewer-search-input"
+          placeholder="Buscar capítulo..." autocomplete="off" spellcheck="false" />
+      </div>
+      <!-- Botón acceso directo a Internet Archive -->
+      <a id="btnIA" href="#" target="_blank" rel="noopener" class="btn-ia">
+        ⎋ Ver en Internet Archive
+      </a>
+    </div>
+
+    <!-- Lista de capítulos -->
+    <div class="viewer-list-wrap">
+
+      <!-- Volver atrás -->
+      <a class="ch-item" href="files.html">
+        <span class="ch-name">../</span>
+      </a>
+
+      <!-- Estado: cargando -->
+      <div class="viewer-loading" id="stateLoading">
+        <div class="spin">◌</div>
+        <div>Cargando archivos desde Internet Archive...</div>
+      </div>
+
+      <!-- Estado: error -->
+      <div class="viewer-error" id="stateError" style="display:none">
+        <span class="err-icon">⚠</span>
+        No se pudo cargar la lista de archivos.
+        <small>Verifica tu conexión o intenta más tarde.</small>
+        <br/>
+        <a id="errLink" href="#" target="_blank" rel="noopener" class="btn-ia" style="margin-top:1rem">
+          Abrir directamente en Internet Archive →
+        </a>
+      </div>
+
+      <!-- Contenedor de archivos (se llena con JS) -->
+      <div id="chList"></div>
+
+      <!-- Sin resultados de búsqueda -->
+      <div class="ch-no-results" id="chNoResults">
+        No se encontró "<span id="chQueryLabel"></span>"
+      </div>
+
+    </div>
+
+    <footer class="viewer-footer">
+      [ARCHIVE] &nbsp;·&nbsp;
+      Alojado en <a href="https://archive.org" target="_blank" rel="noopener">Internet Archive</a>
+      &nbsp;·&nbsp; Acceso libre
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+  /* ════════════════════════════════════════════════════
+     VIEWER.JS — carga los archivos de la temporada
+     usando la API JSON pública de Internet Archive
+  ════════════════════════════════════════════════════ */
+
+  (function () {
+
+    /* ── 1. Mapa de temporadas ── */
+    const SEASONS = {
+      '1': { id: 'LRDG_T1_TB', label: 'Temporada 1' },
+      '2': { id: 'LRDG_T2_TB', label: 'Temporada 2' },
+      '3': { id: 'LRDG_T3_TB', label: 'Temporada 3' },
+      '4': { id: 'LRDG_T4_TB', label: 'Temporada 4' },
+      '5': { id: 'LRDG_T5_TB', label: 'Temporada 5' },
+    };
+
+    /* ── 2. Leer parámetro ?t= de la URL ── */
+    const params  = new URLSearchParams(window.location.search);
+    const tParam  = params.get('t') || '1';
+    const season  = SEASONS[tParam] || SEASONS['1'];
+    const itemId  = season.id;
+    const label   = season.label;
+
+    /* ── 3. Actualizar textos del encabezado ── */
+    document.title                        = `ARCHIVE // ${label.toUpperCase()}`;
+    document.getElementById('pageTitle').textContent  = label;
+    document.getElementById('bcSeason').textContent   = label;
+    document.getElementById('itemId').textContent     = itemId;
+
+    const iaBaseUrl = `https://archive.org/download/${itemId}/Capitulos/`;
+    const iaPageUrl = `https://archive.org/details/${itemId}`;
+
+    document.getElementById('btnIA').href  = iaPageUrl;
+    document.getElementById('errLink').href = iaPageUrl;
+
+    /* ── 4. Extensiones de video/media que queremos mostrar ── */
+    const MEDIA_EXTS = ['mp4','mkv','avi','mov','wmv','flv','webm',
+                        'mp3','ogg','flac','aac','wav',
+                        'pdf','epub','zip','rar','7z','iso','img'];
+
+    /* ── 5. Formatear tamaño en bytes → legible ── */
+    const fmtSize = (bytes) => {
+      if (!bytes || isNaN(bytes)) return '—';
+      const units = ['B','KB','MB','GB','TB'];
+      let i = 0, n = Number(bytes);
+      while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+      return n.toFixed(i > 1 ? 1 : 0) + ' ' + units[i];
+    };
+
+    /* ── 6. Obtener extensión de un nombre de archivo ── */
+    const getExt = (name) => {
+      const parts = name.split('.');
+      return parts.length > 1 ? parts.pop().toUpperCase() : '—';
+    };
+
+    /* ── 7. Icono según extensión ── */
+    const getIcon = (ext) => {
+      const e = ext.toLowerCase();
+      if (['mp4','mkv','avi','mov','wmv','flv','webm'].includes(e)) return '🎞';
+      if (['mp3','ogg','flac','aac','wav'].includes(e))             return '🔊';
+      if (['pdf','epub'].includes(e))                               return '📄';
+      if (['zip','rar','7z'].includes(e))                           return '🗜';
+      if (['iso','img'].includes(e))                                return '💿';
+      return '📁';
+    };
+
+    /* ── 8. Referencia a elementos del DOM ── */
+    const stateLoading = document.getElementById('stateLoading');
+    const stateError   = document.getElementById('stateError');
+    const chList       = document.getElementById('chList');
+    const fileCountEl  = document.getElementById('fileCount');
+    const chSearch     = document.getElementById('chSearch');
+    const chNoResults  = document.getElementById('chNoResults');
+    const chQueryLbl   = document.getElementById('chQueryLabel');
+
+    /* ── 9. Renderizar lista de archivos ── */
+    let allItems = []; // guardamos para el buscador
+
+    const renderFiles = (files) => {
+      if (!files || files.length === 0) {
+        chList.innerHTML = '<div class="viewer-empty">No se encontraron archivos en esta carpeta.</div>';
+        return;
+      }
+
+      allItems = files;
+      fileCountEl.textContent = files.length;
+      chList.innerHTML = '';
+
+      files.forEach((f, i) => {
+        const ext      = getExt(f.name);
+        const icon     = getIcon(ext.toLowerCase());
+        const size     = fmtSize(f.size);
+        /* URL de descarga directa */
+        const fileUrl  = `https://archive.org/download/${itemId}/Capitulos/${encodeURIComponent(f.name)}`;
+
+        const a = document.createElement('a');
+        a.className          = 'ch-item';
+        a.href               = fileUrl;
+        a.target             = '_blank';
+        a.rel                = 'noopener';
+        a.dataset.name       = f.name.toLowerCase();
+        /* Animación de entrada escalonada */
+        a.style.animationDelay = `${i * 30}ms`;
+
+        a.innerHTML = `
+          <span class="ch-name">${icon} ${f.name}</span>
+          <span class="ch-badge">${ext}</span>
+          <span class="ch-size">${size}</span>
+        `;
+
+        chList.appendChild(a);
+      });
+    };
+
+    /* ── 10. Buscador en tiempo real ── */
+    chSearch.addEventListener('input', function () {
+      const q = this.value.trim().toLowerCase();
+      const items = chList.querySelectorAll('a.ch-item');
+      let visible = 0;
+
+      items.forEach(item => {
+        const name = item.dataset.name || '';
+        const show = !q || name.includes(q);
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      chNoResults.style.display = (!q || visible > 0) ? 'none' : 'block';
+      if (chQueryLbl) chQueryLbl.textContent = this.value;
+    });
+
+    /* ── 11. Fetch a la API de Internet Archive ── */
+    /*
+      Internet Archive expone un endpoint JSON por item:
+      https://archive.org/metadata/{itemId}
+      Devuelve { files: [ { name, size, format, ... } ] }
+      Filtramos los que estén dentro de la carpeta "Capitulos/"
+    */
+    const API_URL = `https://archive.org/metadata/${itemId}`;
+
+    fetch(API_URL)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        stateLoading.style.display = 'none';
+
+        /* Filtrar archivos que estén en la carpeta Capitulos/ */
+        const files = (data.files || []).filter(f => {
+          if (!f.name) return false;
+          /* Aceptar si el nombre empieza con Capitulos/ */
+          return f.name.startsWith('Capitulos/');
+        }).map(f => ({
+          /* Quitar el prefijo "Capitulos/" del nombre para mostrarlo limpio */
+          name: f.name.replace(/^Capitulos\//, ''),
+          size: f.size,
+          format: f.format,
+        })).filter(f => f.name && f.name !== ''); /* excluir la carpeta en sí */
+
+        /* Ordenar alfabéticamente por nombre */
+        files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+        renderFiles(files);
+      })
+      .catch(err => {
+        console.error('[ARCHIVE] Error al cargar metadata:', err);
+        stateLoading.style.display = 'none';
+        stateError.style.display   = 'block';
+      });
+
+  })();
+  </script>
+</body>
+</html>
